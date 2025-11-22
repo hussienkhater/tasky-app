@@ -1,11 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tasky_app/home_screen.dart';
-import 'package:tasky_app/text_form_field_eidget.dart';
-import 'package:tasky_app/validator_model.dart';
+import 'package:tasky_app/core/utils/app_dialog.dart';
+import 'package:tasky_app/feature/auth/view/home_screen.dart';
+import 'package:tasky_app/feature/auth/widgets/elevate_button.dart';
+import 'package:tasky_app/feature/auth/widgets/text_form_field_widget.dart';
+import 'package:tasky_app/core/utils/validator_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
-  static const routeName = 'RegisterScreen';
+  static const String routeName = "RegisterScreen";
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -17,6 +20,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   var fullName = TextEditingController();
   var confirmPassword = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  void dispose() {
+    fullName.dispose();
+    email.dispose();
+    password.dispose();
+    confirmPassword.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onRegister() async {
+    if (_formKey.currentState!.validate()) {
+      AppDialog.showLoadingDialog(context);
+      try {
+        await register(email.text, password.text);
+        AppDialog.hideDialog(context);
+        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+      } catch (e) {
+        AppDialog.hideDialog(context);
+        AppDialog.showErrorDialog(context, e.toString());
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +56,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    height: 80,
+                  ),
                   Text(
                     'Register',
                     style: TextStyle(
@@ -47,9 +75,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     height: 5,
                   ),
                   TextFormFieldWidget(
+                    borderRadius: BorderRadius.circular(10),
                     controller: fullName,
-                    validator: Validator.validateName,
-                    hintText: 'Enter Full Name...',
+                    onValidate: Validator.validateName,
+                    hint: 'Enter Full Name...',
                   ),
                   SizedBox(
                     height: 25,
@@ -60,8 +89,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   TextFormFieldWidget(
                     controller: email,
-                    validator: Validator.validateEmail,
-                    hintText: 'Enter Email...',
+                    hint: "Enter Your Email",
+                    borderRadius: BorderRadius.circular(10),
+                    onValidate: Validator.validateEmail,
                   ),
                   SizedBox(
                     height: 25,
@@ -71,11 +101,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     height: 5,
                   ),
                   TextFormFieldWidget(
+                    borderRadius: BorderRadius.circular(10),
                     controller: password,
-                    validator: (value) => Validator.validatePassword(value),
-                    hintText: 'Password...',
+                    onValidate: Validator.validatePassword,
+                    hint: 'Password...',
                     isPassword: true,
-                    obscureText: true,
                   ),
                   SizedBox(
                     height: 25,
@@ -85,38 +115,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     height: 5,
                   ),
                   TextFormFieldWidget(
+                    borderRadius: BorderRadius.circular(10),
                     controller: confirmPassword,
-                    validator: (value) =>
+                    onValidate: (value) =>
                         Validator.validateConfirmPassword(value, password.text),
-                    hintText: 'Password...',
+                    hint: 'Password...',
                     isPassword: true,
-                    obscureText: true,
                   ),
                   SizedBox(
                     height: 85,
                   ),
-                  MaterialButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    height: 48,
-                    minWidth: double.infinity,
-                    color: Color(0xff5F33E1),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Navigator.pushReplacementNamed(
-                            context, HomeScreen.routeName);
-                      }
-                    },
-                    child: Text(
-                      'Register',
-                      style: TextStyle(
-                        color: Color(0xffFFFFFF),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  Center(
+                  child: ElevateButtonScreen(
+                    text: 'Register',
+                    onpressed: _onRegister,
                   ),
+                ),
                   SizedBox(
                     height: 20,
                   ),
@@ -156,5 +170,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<UserCredential> register(String email, String password) async {
+  try {
+    UserCredential credential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+    return credential;
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'weak-password') {
+      throw 'The password provided is too weak.';
+    } else if (e.code == 'email-already-in-use') {
+      throw 'The account already exists for that email.';
+    } else {
+      throw e.message ?? 'Registration failed';
+    }
   }
 }

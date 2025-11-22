@@ -1,6 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:tasky_app/onboarding_screen.dart';
+import 'package:tasky_app/feature/auth/view/onboarding_screen.dart';
 
 class SplachScreen extends StatefulWidget {
   const SplachScreen({super.key});
