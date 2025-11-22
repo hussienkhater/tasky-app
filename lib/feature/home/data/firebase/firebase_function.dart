@@ -5,9 +5,9 @@ import 'package:tasky_app/feature/home/data/model/add_user_model.dart';
 import 'package:tasky_app/feature/home/data/model/task_model.dart';
 
 class FireBaseFunction {
+  /// ------------------ Task Collection ------------------
   static CollectionReference<TaskModel> getTaskCollection() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
-
     return FirebaseFirestore.instance
         .collection("Users")
         .doc(uid)
@@ -18,19 +18,33 @@ class FireBaseFunction {
         );
   }
 
-  static Future<void> addTask(TaskModel task) {
+  /// إضافة مهمة جديدة
+  static Future<void> addTask(TaskModel task) async {
     var collection = getTaskCollection();
     var docRef = collection.doc();
     task.id = docRef.id;
-    return docRef.set(task);
+    await docRef.set(task);
   }
 
-  static addUser(AddUserModel userModel) {
-    var collection = getUserCollection();
-    var docRef = collection.doc(userModel.id);
-    docRef.set(userModel);
+  /// تحديث حالة المهمة فقط (isDone)
+  static Future<void> updateTaskDoneStatus(String taskId, bool isDone) async {
+    await getTaskCollection().doc(taskId).update({
+      'isDone': isDone,
+    });
   }
 
+  /// تحديث كامل بيانات المهمة
+  static Future<void> updateTask(TaskModel taskModel) async {
+    if (taskModel.id == null) return;
+    await getTaskCollection().doc(taskModel.id).update(taskModel.toJson());
+  }
+
+  /// حذف مهمة
+  static Future<void> deleteTask(String taskId) async {
+    await getTaskCollection().doc(taskId).delete();
+  }
+
+  /// جلب المهام بتاريخ محدد
   static Stream<QuerySnapshot<TaskModel>> getTasks(DateTime date) {
     var collection = getTaskCollection();
     return collection
@@ -41,6 +55,24 @@ class FireBaseFunction {
         .snapshots();
   }
 
+  /// ------------------ User Collection ------------------
+  static CollectionReference<AddUserModel> getUserCollection() {
+    return FirebaseFirestore.instance
+        .collection("Users")
+        .withConverter<AddUserModel>(
+          fromFirestore: (snapshot, _) => AddUserModel.fromJson(snapshot.data()!),
+          toFirestore: (user, _) => user.toJson(),
+        );
+  }
+
+  /// إضافة مستخدم جديد
+  static Future<void> addUser(AddUserModel userModel) async {
+    var collection = getUserCollection();
+    var docRef = collection.doc(userModel.id);
+    await docRef.set(userModel);
+  }
+
+  /// قراءة بيانات المستخدم الحالي
   static Future<AddUserModel?> readUser() async {
     var collection = getUserCollection();
     DocumentSnapshot<AddUserModel> docUser =
@@ -48,36 +80,29 @@ class FireBaseFunction {
     return docUser.data();
   }
 
-  static Future<void> deletTask(String id) {
-    return getTaskCollection().doc(id).delete();
-  }
-
-  static ubdateTask(TaskModel taskModel) {
-    return getTaskCollection().doc(taskModel.id).update(taskModel.toJson());
-  }
-
-  static createAccount(
-    String emailAddress,
-    String password, {
-    required Function onSuccess,
-    required Function onError,
+  /// ------------------ Authentication ------------------
+  static Future<void> createAccount({
+    required String email,
+    required String password,
     required String name,
     required int age,
     required int phone,
+    required Function onSuccess,
+    required Function(String? error) onError,
   }) async {
     try {
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailAddress,
+        email: email,
         password: password,
       );
       AddUserModel userModel = AddUserModel(
         id: credential.user!.uid,
         name: name,
-        email: emailAddress,
+        email: email,
         password: password,
       );
-      addUser(userModel);
+      await addUser(userModel);
       onSuccess();
     } on FirebaseAuthException catch (e) {
       onError(e.message);
@@ -86,29 +111,20 @@ class FireBaseFunction {
     }
   }
 
-  static signInAccount(String emailAddress, String password,
-      {required Function onSuccess, required Function onError}) async {
+  static Future<void> signInAccount({
+    required String email,
+    required String password,
+    required Function onSuccess,
+    required Function(String? error) onError,
+  }) async {
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailAddress,
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
         password: password,
       );
       onSuccess();
     } on FirebaseAuthException catch (e) {
       onError(e.message);
     }
-  }
-
-  static CollectionReference<AddUserModel> getUserCollection() {
-    return FirebaseFirestore.instance
-        .collection("Users")
-        .withConverter<AddUserModel>(
-      fromFirestore: (snapshot, _) {
-        return AddUserModel.fromJson(snapshot.data()!);
-      },
-      toFirestore: (user, _) {
-        return user.toJson();
-      },
-    );
   }
 }

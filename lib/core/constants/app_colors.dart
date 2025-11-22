@@ -8,4 +8,5 @@ abstract class AppColors {
   static const Color titleText = Color(0xcc24252C);
   static const Color subtitleText = Color(0xff6E6A7C);
   static const Color border = Color(0xffBABABA);
+  static const Color red = Color(0xffFF4949);
 }
