@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tasky_app/core/constants/app_colors.dart';
-import 'package:tasky_app/core/constants/app_fonts.dart';
 
 
 class AppButton extends StatelessWidget {
@@ -18,7 +17,14 @@ class AppButton extends StatelessWidget {
       highlightElevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       color: AppColors.primary,
-      child: Text(text, style: AppFonts.buttonText),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

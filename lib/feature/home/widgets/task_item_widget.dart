@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:tasky_app/core/constants/app_colors.dart';
 import 'package:tasky_app/core/constants/app_constant.dart';
-import 'package:tasky_app/core/constants/app_fonts.dart';
 import 'package:tasky_app/feature/home/data/firebase/firebase_function.dart';
 import 'package:tasky_app/feature/home/data/model/task_item_model.dart';
 
 class TaskItemWidget extends StatelessWidget {
-  const TaskItemWidget({super.key, required this.taskModel});
+  const TaskItemWidget({
+    super.key,
+    required this.taskModel,
+    required this.isCompleted,
+    required this.onChanged,
+  });
+
   final TaskItemModel taskModel;
+  final bool isCompleted; // الحالة الحالية
+  final void Function(bool?) onChanged; // callback لتحديث الحالة
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: taskModel.onTap,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(10),
@@ -43,22 +51,31 @@ class TaskItemWidget extends StatelessWidget {
             child: Row(
               children: [
                 Radio(
-                  value: taskModel.isCompleted,
-                  groupValue: true,
-                  onChanged: (value) {
-                    taskModel.onChanged(value);
-                  },
+                  value: true,
+                  groupValue: isCompleted,
+                  onChanged: onChanged,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
-                    spacing: 6,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(taskModel.title, style: AppFonts.cardTitle),
+                      Text(
+                        taskModel.title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          color: AppColors.titleText,
+                        ),
+                      ),
+                      SizedBox(height: 6),
                       Text(
                         taskModel.date.toString().substring(0, 10),
-                        style: AppFonts.cardSubtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.normal,
+                          color: AppColors.subtitleText,
+                        ),
                       ),
                     ],
                   ),

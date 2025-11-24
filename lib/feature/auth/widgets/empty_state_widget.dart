@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tasky_app/core/constants/app_colors.dart';
 import 'package:tasky_app/core/constants/app_constant.dart';
-import 'package:tasky_app/core/constants/app_fonts.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   const EmptyStateWidget({super.key});
@@ -18,12 +18,20 @@ class EmptyStateWidget extends StatelessWidget {
           ),
           const Text(
             'What do you want to do today?',
-            style: AppFonts.homeTitle,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.titleText,
+            ),
             textAlign: TextAlign.center,
           ),
           const Text(
             'Tap + to add your tasks',
-            style: AppFonts.onBoardingSubtitle,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.titleText,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
