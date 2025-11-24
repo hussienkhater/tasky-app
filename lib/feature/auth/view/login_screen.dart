@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: GestureDetector(
         onTap: () {
-          Navigator.pushNamed(context, RegisterScreen.routeName);
+          Navigator.pushNamed(context, HomeScreen.routeName);
         },
         child: Text.rich(TextSpan(
             text: 'Don’t have an account? ',

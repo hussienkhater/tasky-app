@@ -8,7 +8,7 @@ abstract class AppConstants {
       'assets/images/onboarding_screen_2.png';
   static const String onBoardingImage3 =
       'assets/images/onboarding_screen_3.png';
-  static const String homeIcon = 'assets/images/home_screen.png';
+  static const String emptyStateImage = 'assets/images/empty_screen.png';
   static const String logOutIcon = 'assets/images/icons/logout.png';
   static const String timerIcon = 'assets/icons/timer.png';
   static const String sendIcon = 'assets/icons/send.png';

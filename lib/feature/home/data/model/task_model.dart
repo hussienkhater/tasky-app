@@ -12,7 +12,7 @@ class TaskModel {
   final String? description;
   final DateTime ? date;
   final int? priority;
-  final bool? isDone;
+  bool? isDone;
 
 
   TaskModel.fromJson(Map<String, dynamic> json)
